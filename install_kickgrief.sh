@@ -4,8 +4,16 @@
 if [ "${USER}" != "root" ]
 then
 	echo "This script needs to be run with sudo e.g."
-	echo "sudo ./${0}"
+	echo "sudo ./${0} <wired>"
 	exit 1
+fi
+
+# By default use wlan0 as the Internet-facing interface. But change to eth1 if
+# 'wired' option is provided
+INTERNET_NIC=wlan0
+if [ ! -z "${1}" -a "${1}" == "wired" ]
+then
+  INTERNET_NIC=eth1
 fi
 
 # First update the system to make sure all the latest stuff is on here
@@ -46,9 +54,9 @@ pip3 install flask
 # Set up iptables
 iptables -F 
 iptables -t nat -F
-iptables -t nat -A POSTROUTING -o wlan0 -j MASQUERADE  
-iptables -A FORWARD -i wlan0 -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT  
-iptables -A FORWARD -i eth0 -o wlan0 -j ACCEPT
+iptables -t nat -A POSTROUTING -o ${INTERNET_NIC} -j MASQUERADE  
+iptables -A FORWARD -i ${INTERNET_NIC} -o eth0 -m state --state RELATED,ESTABLISHED -j ACCEPT  
+iptables -A FORWARD -i eth0 -o ${INTERNET_NIC} -j ACCEPT
 
 # Persist the rules
 sh -c 'iptables-save > /etc/iptables.rules'
@@ -97,11 +105,9 @@ systemctl restart dnsmasq
 # Install website
 CURRENT_DIR=`pwd`
 cp -R kickgrief /var/www/
-cd /var/www/
-tar xvf kickgrief.tar
 
-# Assign wlan0 IP to variable
-MY_IP=$(/sbin/ip -o -4 addr list wlan0 | awk '{print $4}' | cut -d/ -f1)
+# Assign ${INTERNET_NIC} IP to variable
+MY_IP=$(/sbin/ip -o -4 addr list ${INTERNET_NIC} | awk '{print $4}' | cut -d/ -f1)
 
 cat <<EOF > /etc/apache2/sites-available/kickgrief.conf
 <VirtualHost *:80>

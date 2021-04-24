@@ -79,3 +79,9 @@ http://192.168.0.21
 14) Click the big green button
 
 15) 10s later, you should be in a solo, public session!!!
+
+# Using Wired connection
+If you have your Xbox normally hooked in via an ethernet cable to your router to minimise latency, that's fine. You can still use this. You'll need to get a USB/ethernet adapter (e.g. https://www.amazon.co.uk/gp/product/B00M77HLII). Then connect the USB plug to your PI and string a cable into your router. Then, when you get to step 9 in the instructions, provide a 'wired' option i.e.
+```
+sudo ./install_kickgrief.sh wired
+```
