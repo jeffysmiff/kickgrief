@@ -9,13 +9,14 @@ app = Flask(__name__, instance_relative_config=True)
 
 # a simple page that says hello
 @app.route('/',methods=['GET','POST'])
-def kick():
+def reset_vpn():
     if request.method == "POST":
-        os.system('sudo sysctl -w net.ipv4.ip_forward=0')
+        os.system('sudo service openvpn stop')
+        sleep(5)
+        os.system('sudo service openvpn start')
         sleep(10)
-        os.system('sudo sysctl -w net.ipv4.ip_forward=1')
-        return render_template('kick.html',title='kick') 
-    return render_template('kick.html',title='kick')
+        return render_template('resetvpn.html',title='Reset VPN') 
+    return render_template('resetvpn.html',title='Reset VPN')
 
 if __name__ == "__main__":
     app.run()
